@@ -103,6 +103,9 @@ pc.defineParameter("FIXED_UE3", "Bind to a specific UE",
 pc.defineParameter("FIXED_UE4", "Bind to a specific UE",
                   portal.ParameterType.STRING, "", advanced=True,
                  longDescription="Input the name of a PhantomNet UE node to allocate (e.g., 'ue4').  Leave blank to let the mapping algorithm choose.")
+pc.defineParameter("FIXED_UE5", "Bind to a specific UE",
+                  portal.ParameterType.STRING, "", advanced=True,
+                 longDescription="Input the name of a PhantomNet UE node to allocate (e.g., 'ue5').  Leave blank to let the mapping algorithm choose.")
 pc.defineParameter("FIXED_ENB", "Bind to a specific eNodeB",
                    portal.ParameterType.STRING, "", advanced=True,
                    longDescription="Input the name of a PhantomNet eNodeB device to allocate (e.g., 'nuc1').  Leave blank to let the mapping algorithm choose.  If you bind both UE and eNodeB devices, mapping will fail unless there is path between them via the attenuator matrix.")
@@ -157,6 +160,7 @@ else:
     enb1_rue2_rf = enb1.addInterface("rue2_rf")
     enb1_rue3_rf = enb1.addInterface("rue3_rf")
     enb1_rue4_rf = enb1.addInterface("rue4_rf")
+    enb1_rue5_rf = enb1.addInterface("rue5_rf")
 
 
     # Add an OTS (Nexus 5) UE 1
@@ -199,6 +203,16 @@ else:
     rue4.adb_target = "adb-tgt"
     rue4_enb1_rf = rue4.addInterface("enb4_rf")
 
+    # Add an OTS (Nexus 5) UE 5
+    rue5 = request.UE("rue5")
+    if params.FIXED_UE5:
+        rue5.component_id = params.FIXED_UE5
+    rue5.hardware_type = GLOBALS.UE_HWTYPE
+    rue5.disk_image = GLOBALS.UE_IMG
+    rue5.Desire("rf-radiated" if params.TYPE == "ota" else "rf-controlled", 1)
+    rue5.adb_target = "adb-tgt"
+    rue5_enb1_rf = rue5.addInterface("enb5_rf")
+
     # Create the RF link between each Nexus 5 UE and eNodeB
     rflink1 = request.RFLink("rflink1")
     rflink1.addInterface(enb1_rue1_rf)
@@ -212,6 +226,9 @@ else:
     rflink4 = request.RFLink("rflink4")
     rflink4.addInterface(enb1_rue4_rf)
     rflink4.addInterface(rue4_enb1_rf)
+    rflink5 = request.RFLink("rflink5")
+    rflink5.addInterface(enb1_rue5_rf)
+    rflink5.addInterface(rue5_enb1_rf)
 
     # Add a link connecting the NUC eNB and the OAI EPC node.
     epclink.addNode(enb1)
